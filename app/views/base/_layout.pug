@@ -7,83 +7,332 @@ each value, key in content
 unless (page.meta)
   - page.meta = content.site.meta
 block variables
-
-doctype html
-html.html(lang='ru' prefix='og: http://ogp.me/ns#')
-  head
-    title!=(typeof page.title !== "undefined") ? page.title  : relativePath + " - " + content.site.title
-    meta(http-equiv='Content-Type' content='text/html;charset=' + content.site.meta.charset)/
-
-    // Meta SEO - Description, Keywords, Title
-    meta(name='title' content=(typeof page.title !== "undefined") ? page.title  : relativePath + " - " + content.site.meta.title)/
-    meta(name='description' content=page.meta.description ? page.meta.description : relativePath + content.site.meta.description)/
-    meta(name='keywords' content= page.meta.keywords ? page.meta.keywords : relativePath + " - " + content.site.meta.keywords)/
-
-    // Multilanguage localization
-    link(rel='alternate' href='/' hreflang='x-default')/
-    //- link(rel='alternate' href='/en/' hreflang='en')/
-    //- link(rel='alternate' href='/ru/' hreflang='ru')/
-    
-    // Mobile viewport optimization
-    meta(name='viewport' content='width=device-width, initial-scale=1')/
-    meta(name='HandheldFriendly' content='true')/
-    meta(name='MobileOptimized' content='320')/
-    //[if IEMobile]><meta http-equiv='cleartype' content='on' /><![endif]
-
-    // Replace favicon.ico and apple-touch-icon.png
-    link(rel='shortcut icon' type='image/png' href='img/logo/' + content.site.meta.favicon)
-    link(rel='apple-touch-icon' type='image/png' href='img/logo/' + content.site.meta.appleTouchIcon)
-
-    // Disables automatic  of possible phone numbers and address in Safari on iOS
-    meta(name='format-detection' content='telephone=no')/
-    meta(name='format-detection' content='address=no')/
-
-    // Microformats Open Graph
-    each value, key in (page.meta.openGraph ? page.meta.openGraph : content.site.meta.openGraph)
-      meta(property='og:' + key, content=value)/
-    
-    // Microformats Twitter Cards
-    each value, key in (page.meta.twitter ? page.meta.twitter : content.site.meta.twitter)
-      meta(name='twitter:' + key, content= value)/
-
-    // No cache
-    meta(http-equiv='cache-control', content='no-cache')
-    meta(http-equiv='expires', content='0')
-    
-    // build:css css/bundle.min.css
-    
-    // Fonts CSS
-    link(rel='stylesheet' href='css/fonts.css')
-    // Bootstrap CSS
-    link(rel='stylesheet' href='css/bootstrap.css')
-    // Font-Awesome CSS
-    link(rel='stylesheet' href='css/font-awesome.css')
-    block styles
-    // Custom CSS 
-    link(rel='stylesheet' href='css/style.css')
-
-    // endbuild
-
-    // HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries
-    // WARNING: Respond.js doesn't work if you view the page via file://
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-  body.body
-    block header
-    main.main
-      block content
-    block footer
-    block modal
-
-    // build:js js/bundle.min.js
-
-    // Plugins JavaScript
-    script(src='js/plugins.min.js')
-    block scripts
-    // Custom JavaScript
-    script(src='js/main.js')
-
-    // endbuild
+doctype html 
+head
+  meta(charset='UTF-8')
+  title Верстка — forzz › Центр сообщений
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  meta(name='description', content='Ведущий украинский сервис для поиска удаленной работы и фриланс проектов. От статьи для сайта про бобров до социальной сети нового поколения. На нашей фриланс бирже вы найдете профессиональных исполнителей и честных заказчиков.')
+  meta(name='author', content='freelancehunt.com')
+  link(rel='icon', href='favicon.ico', type='image/x-icon')
+  link(rel='apple-touch-icon', sizes='57x57', href='http://46.4.130.245/static/images/apple-icon-57x57.png')
+  link(rel='apple-touch-icon', sizes='72x72', href='http://46.4.130.245/static/images/apple-icon-72x72.png')
+  link(rel='apple-touch-icon', sizes='114x114', href='http://46.4.130.245/static/images/apple-icon-114x114.png')
+  link(rel='apple-touch-icon', sizes='144x144', href='http://46.4.130.245/static/images/apple-icon-144x144.png')
+  link(rel='manifest', href='manifest.json')
+  meta(http-equiv='X-UA-Compatible', content='IE=edge')
+  meta(property='og:description', content='Ведущий украинский сервис для поиска удаленной работы и фриланс проектов. От статьи для сайта про бобров до социальной сети нового поколения. На нашей фриланс бирже вы найдете профессиональных исполнителей и честных заказчиков.')
+  meta(property='og:title', content='Верстка — forzz › Центр сообщений')
+  meta(property='og:image', content='https://freelancehunt.com/http://46.4.130.245/static/images/freelancehunt-header.jpg')
+  meta(property='og:type', content='website')
+  meta(property='og:site_name', content='Freelancehunt.com')
+  meta(name='twitter:description', content='Ведущий украинский сервис для поиска удаленной работы и фриланс проектов. От статьи для сайта про бобров до социальной сети нового поколения. На нашей фриланс бирже вы найдете профессиональных исполнителей и честных заказчиков.')
+  meta(name='twitter:image:src', content='https://freelancehunt.com/http://46.4.130.245/static/images/logo/freelancehunt-ru@2x.png')
+  meta(name='twitter:url', content='https://freelancehunt.com')
+  link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic&subset=cyrillic', media='screen')
+  link(rel='stylesheet', href='https://cdn.jsdelivr.net/bootstrap/3.3.7/css/bootstrap.min.css', media='screen')
+  link(rel='stylesheet', href='http://46.4.130.245/static/css/vendor-all.1f3c36c4.css')
+  link(rel='stylesheet', href='http://46.4.130.245/static/css/freelancehunt-all.9d5e6aa0.css', media='screen')
+  link(rel='alternate', hreflang='en', href='https://en.freelancehunt.com/mailbox/read/thread/2617283')
+  link(rel='alternate', hreflang='ru-by', href='https://freelancehunt.by/mailbox/read/thread/2617283')
+  link(rel='alternate', hreflang='ru-kz', href='https://freelancehunt.kz/mailbox/read/thread/2617283')
+  link(rel='alternate', hreflang='ru-md', href='https://freelancehunt.md/mailbox/read/thread/2617283')
+  link(rel='alternate', hreflang='ru-ru', href='https://freelancehunt.ru/mailbox/read/thread/2617283')
+  link(rel='alternate', hreflang='ru-ua', href='https://freelancehunt.com/mailbox/read/thread/2617283')
+  link(rel='alternate', hreflang='uk-ua', href='https://freelancehunt.ua/mailbox/read/thread/2617283')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js')
+  // message
+  script(type='text/javascript', src='http://46.4.130.245/static/js/bootstrap.min.js')
+  script(type='text/javascript', src='http://46.4.130.245/static/js/note.js')
+  script(type='text/javascript', src='http://46.4.130.245/static/js/note-ru-RU.js')
+  script(type='text/javascript', src='http://46.4.130.245/static/js/all.fine-uploader.min.js')
+  link(type='text/css', href='http://46.4.130.245/static/css/summernote.css', rel='stylesheet', media='screen')
+  script(type='text/javascript', src='http://46.4.130.245/static/js/scrypt.js')
+  script(type='text/javascript', src='js/main.js')
+  // /message
+#top-nav
+  .container
+    .row(style='position: relative;')
+      .col-md-4(style='padding-top: 5px')
+        a#header-logo.hidden-xs.hidden-sm.img-responsive.pull-left.marker-no-tooltip.lang-ru.default(href='', title='Freelancehunt.com — фриланс и удаленная работа в Украине')
+        a#header-logo-sm.visible-xs.visible-sm.img-responsive.pull-left.marker-no-tooltip(href='', title='Freelancehunt.com — фриланс и удаленная работа в Украине')
+      #top-ushki
+        .btn-group
+          .btn-group
+            a#my-feed-menu.btn.btn-default.btn-sm.dropdown-toggle(data-toggle='dropdown', href='#')
+              i.fa.fa-bolt
+              span.hidden-xs Лента
+              span#unread-feed-count.label.color-light-blue.hidden 0
+              span.caret
+            ul.dropdown-menu.smallest
+              table.table.table-condensed
+                tr
+                  td.text-center
+                    i.fa.fa-spinner.fa-lg.fa-spin
+          a#unread-messages-link.btn.btn-default.btn-sm(href='https://freelancehunt.com/mailbox')
+            i.fa.fa-envelope-o
+            span.hidden-xs Сообщения
+            span.label.color-blue.hidden(data-unread-message-count='') 0
+          .btn-group
+            a#my-projects-menu.btn.btn-default.btn-sm.dropdown-toggle(data-toggle='dropdown', href='#')
+              i.fa.fa-gavel
+              span.hidden-xs Проекты
+              span.label.color-green 7
+              span.caret
+            ul.dropdown-menu.smallest
+              li
+                a(href='https://freelancehunt.com/my/projects?group=all')
+                  i.fa.fa-gavel
+                  |  Все мои проекты 
+                  i.fa.fa-spinner.fa-spin.hidden
+              li
+                a(href='https://freelancehunt.com/project/add')
+                  i.fa.fa-plus
+                  strong Опубликовать проект
+          .btn-group
+            a#my-contests-menu.btn.btn-default.btn-sm.dropdown-toggle(data-toggle='dropdown', href='#')
+              i.fa.fa-trophy
+              span.hidden-xs Конкурсы
+              span.caret
+            ul.dropdown-menu.smallest
+              li
+                a(href='https://freelancehunt.com/my/contests?group=all')
+                  i.fa.fa-trophy
+                  |  Все мои конкурсы 
+                  i.fa.fa-spinner.fa-spin.hidden
+              li
+                a(href='https://freelancehunt.com/contest/add')
+                  i.fa.fa-plus
+                  strong Опубликовать конкурс
+        .btn-group
+          a#my-profile.btn.btn-default.btn-sm.dropdown-toggle(data-toggle='dropdown', href='#')
+            img.vertical.avatar.avatar-small-border(src='https://content.freelancehunt.com/profile/photo/50/andrush.png', width='16', height='16')
+            span#profile-logged-in.hidden-xs(data-is-send-pm-audio-notify='0') andrush
+            span.label.color-blue.hidden
+            span.caret
+          ul.dropdown-menu.pull-right.smaller
+            li.visible-xs
+              a(href='https://freelancehunt.com/mailbox')
+                i.fa.fa-envelope-o
+                |  Сообщения 
+                span.label.color-blue.hidden 0
+            li
+              a(href='https://freelancehunt.com/my')
+                i.fa.fa-home
+                |  Мой профиль
+            li
+              a(href='https://freelancehunt.com/my/team')
+                i.fa.fa-users
+                |  Команда
+            li
+              a(href='https://freelancehunt.com/my/personal')
+                i.fa.fa-address-card
+                |  Личные данные
+            li
+              a(href='https://freelancehunt.com/my/preferences')
+                i.fa.fa-cog
+                |  Настройки
+            li
+              a(href='https://freelancehunt.work/my/finance')
+                i.fa.fa-credit-card
+                span#current-balance Финансы
+            li.divider
+            li
+              a(href='profile/logout')
+                i.fa.fa-sign-out
+                |  Выход
+      .pull-right.hidden-xs.top-menu
+        a.btn.btn-success(href='project/add')
+          i.fa.fa-gavel
+          |  Добавить проект
+        a.btn.btn-success(href='contest/add')
+          i.fa.fa-trophy
+          |  Открыть конкурс
+        a.btn.btn-success(href='freelancers')
+          i.fa.fa-users
+          |  Фрилансеры
+        a.btn.btn-success(href='showcase')
+          i.fa.fa-picture-o
+          span.hidden-sm  Работы
+      .pull-right.visible-xs.top-menu
+        a.btn.btn-success(href='project/add', title='Добавить проект')
+          i.fa.fa-gavel
+        a.btn.btn-success(href='contest/add', title='Открыть конкурс')
+          i.fa.fa-trophy
+        a.btn.btn-success(href='freelancers', title='Фрилансеры')
+          i.fa.fa-users
+        a.btn.btn-success(href='showcase', title='Работы')
+          i.fa.fa-picture-o
+.container
+  .page
+    div(style='text-align: left')
+    div(data-presence-ids='331809,301649')
+    .row
+      .col-md-12
+        h1
+          a(href='https://freelancehunt.com/mailbox') Переписки
+          | › Переписка с 
+          a(href='employer/forzz.html', title='Профиль forzz')  Артёмом Литвинко
+          span#total-messages-in-thread.label.color-blue.with-tooltip(title='Сообщений в теме') 6
+          img#io-enabled.with-tooltip.fade(src='http://46.4.130.245/static/images/fugu/lightning.png', width='16', height='16', title='Живая переписка активирована: вы будете получать новые сообщения без перегрузки страницы')
+    .row
+      .col-md-12
+        a.btn.btn-xs.btn-default.opacity-50.with-tooltip(href='https://freelancehunt.com/service/plus', title='Данная функция доступна в профиле Плюс')
+          img.vertical-middle(src='http://46.4.130.245/static/images/fugu/umbrella--plus.png', width='16', height='16')
+          span.hidden-sm.hidden-xs В черный список
+        a.btn.btn-xs.btn-default.opacity-50.with-tooltip(href='https://freelancehunt.com/service/plus', title='Данная функция доступна в профиле Плюс')
+          img.vertical-middle(src='http://46.4.130.245/static/images/fugu/bookmark--plus.png', width='16', height='16')
+          span.hidden-sm.hidden-xs В закладки
+        a.btn.btn-default.btn-xs(href='mailbox/markunread/thread/2617283', title='Отметить переписку как непрочитанную')
+          img.icon-16.vertical(src='http://46.4.130.245/static/images/fugu/mail-medium.png')
+          span.hidden-sm.hidden-xs Отметить как непрочитанную
+        a.btn.btn-default.btn-xs(href='https://freelancehunt.com/mailbox/index/recipient/301649', title='Показать все переписки с данным пользователем')
+          img.icon-16.vertical(src='http://46.4.130.245/static/images/fugu/mails-stack.png')
+          span.hidden-sm.hidden-xs Все переписки
+    br
+    .row
+      .col-md-12
+        #attachments-index.well.hidden
+          .pull-left.text-center(style='margin-right: 4em; margin-bottom: 3em')
+            a(href='employer/andrush.html')
+              img.vertical.avatar.img-rounded(src='https://content.freelancehunt.com/profile/photo/50/andrush.png', width='16', height='16', alt='Dmitry A.')
+            a(href='#message-13545682', title='Перейти к сообщению, содержащему это вложение') 24 июля в 22:41
+            br
+            a.photoswipe(href='https://content.freelancehunt.com/message/34082/a8fba/1034344/%D0%B8%D0%BA%D0%BE%D0%BD1.png', target='_blank', data-gallery-id='1', data-width='1750', data-height='1534')
+              img(src='https://content.freelancehunt.com/message/thumbnail/225/34082/a8fba/1034344/%D0%B8%D0%BA%D0%BE%D0%BD1.png', style='max-width: 150px; max-height: 150px', alt='икон1.png')
+          .clearfix
+        div
+          ul.chat-box
+            li#message-13544995.arrow-box-left(data-message-id='13544995', data-profile-id='301649')
+              .avatar
+                a(href='https://freelancehunt.com/freelancer/forzz.html')
+                  .img-rounded.avatar-container-25(style='background-image: url(https://content.freelancehunt.com/profile/photo/50/forzz.png);')
+                    .profile-status.offline.with-tooltip(data-presence-for-profile-id='301649', title='Был на сервисе 5 часов 55 минут назад')
+              .info
+                a(href='https://freelancehunt.com/freelancer/forzz.html', title='Профиль фрилансера forzz') Артём Литвинко
+                .pull-right.smallest
+                  time.timeago(datetime='2018-07-24T18:54:57Z') 24 июля в 21:54
+                  |  
+                  a(href='#message-13544995')
+                    i.fa.fa-anchor
+                  |  
+                  a.reply-form-with-quote-trigger(href='mailbox/read/thread/2617283', title='Цитировать')
+                    i.fa.fa-quote-left
+              h4(style='color: inherit') Верстка
+              .linkify-marker.img-responsive-container(style='padding-top: 5px')
+                p Здравствуйте Дмитрий, вы уже нашли исполнителя на верстку?
+              .clearfix
+              .clearfix
+            li#message-13545682.arrow-box-right(data-message-id='13545682', data-profile-id='331809')
+              .avatar
+                a(href='https://freelancehunt.com/employer/andrush.html')
+                  .img-rounded.avatar-container-25(style='background-image: url(https://content.freelancehunt.com/profile/photo/50/andrush.png);')
+                    .profile-status.online.with-tooltip(data-presence-for-profile-id='331809', title='Сейчас онлайн')
+              .info
+                a(href='https://freelancehunt.com/employer/andrush.html', title='Профиль заказчика andrush') Dmitry Andrushchenko
+                .pull-right.smallest
+                  time.timeago(datetime='2018-07-24T19:41:01Z') 24 июля в 22:41
+                  |  
+                  a(href='#message-13545682')
+                    i.fa.fa-anchor
+              .linkify-marker.img-responsive-container(style='padding-top: 5px')
+                p Нет, но завтра утром мне кого-то нужно будет выбрать:
+                p
+                  br
+                p
+                  br
+                p Сможете такое сделать?
+                p
+                  br
+                p
+                  | Посмотрите внимательно картинку, она немного кривая, но думаю общий смысл я донес, нужно показать страницы конкретного сайта. Каждая страница должна состоять из нескольких блоков, возможно нужно добавить еще блока помимо "SEO ключи" - "фразы в топ" и "Конкуренты" , их я уже рисовать не стал. но если все сдвинуть немного вправо от картинки (скриншота), то думаю 2 блока еще можно аккуратно вместить.
+                p
+                  | Думаю, что ьлок нужно свертсать с исполльзованием bootsrap, но это не является обязательным условием. Прошу лишь указать в заявке, что Вы собираетесь использовать. Для меня важен аккуратный код, который легко будет темизировать.
+                p
+                  br
+                p
+                  | Я попробовал сделать, но получилось криво: 
+                  a(href='http://46.4.130.245/test/test-bootstrap/111.html', rel='nofollow noopener', target='_blank') http://46.4.130.245/test/test-bootstrap/111.html
+              .clearfix
+                div(style='display: inline-block; vertical-align: top; text-align: center')
+                  a.photoswipe(href='https://content.freelancehunt.com/message/34082/a8fba/1034344/%D0%B8%D0%BA%D0%BE%D0%BD1.png', target='_blank', data-gallery-id='1', data-width='1750', data-height='1534')
+                    img.with-tooltip(src='https://content.freelancehunt.com/message/thumbnail/225/34082/a8fba/1034344/%D0%B8%D0%BA%D0%BE%D0%BD1.png', title='икон1.png')
+              .clearfix
+            li#message-13545742.arrow-box-left(data-message-id='13545742', data-profile-id='301649')
+              .avatar
+                a(href='https://freelancehunt.com/freelancer/forzz.html')
+                  .img-rounded.avatar-container-25(style='background-image: url(https://content.freelancehunt.com/profile/photo/50/forzz.png);')
+                    .profile-status.offline.with-tooltip(data-presence-for-profile-id='301649', title='Был на сервисе 5 часов 55 минут назад')
+              .info
+                a(href='https://freelancehunt.com/freelancer/forzz.html', title='Профиль фрилансера forzz') Артём Литвинко
+                .pull-right.smallest
+                  time.timeago(datetime='2018-07-24T19:46:15Z') 24 июля в 22:46
+                  |  
+                  a(href='#message-13545742')
+                    i.fa.fa-anchor
+                  |  
+                  a.reply-form-with-quote-trigger(href='mailbox/read/thread/2617283', title='Цитировать')
+                    i.fa.fa-quote-left
+              .linkify-marker.img-responsive-container(style='padding-top: 5px')
+                p Только вёрстка, я правильно понимаю?
+              .clearfix
+              .clearfix
+            li#message-13545759.arrow-box-left(data-message-id='13545759', data-profile-id='301649')
+              .avatar
+                a(href='https://freelancehunt.com/freelancer/forzz.html')
+                  .img-rounded.avatar-container-25(style='background-image: url(https://content.freelancehunt.com/profile/photo/50/forzz.png);')
+                    .profile-status.offline.with-tooltip(data-presence-for-profile-id='301649', title='Был на сервисе 5 часов 55 минут назад')
+              .info
+                a(href='https://freelancehunt.com/freelancer/forzz.html', title='Профиль фрилансера forzz') Артём Литвинко
+                .pull-right.smallest
+                  time.timeago(datetime='2018-07-24T19:47:53Z') 24 июля в 22:47
+                  |  
+                  a(href='#message-13545759')
+                    i.fa.fa-anchor
+                  |  
+                  a.reply-form-with-quote-trigger(href='mailbox/read/thread/2617283', title='Цитировать')
+                    i.fa.fa-quote-left
+              .linkify-marker.img-responsive-container(style='padding-top: 5px')
+                p Делать буду на bootstrap+ flex, 
+              .clearfix
+              .clearfix
+            form#userform(action='', method='post')
+              .form-group(style='margin-bottom: 0')
+                .col-sm-12
+                  textarea#message-0.form-control.note(rows='8', data-lang='ru-RU', name='message')
+                  table.file-uploader-container
+                    tr
+                      td
+                        #file-uploader
+                      td.pull-right(style='vertical-align: bottom')
+                        button#add-0.btn.btn-primary.btn-sm.ladda-button(type='submit', data-style='slide-left', name='add', title='Вы можете использовать Ctrl+Enter для быстрой отправки сообщения')
+                          i.fa.fa-paper-plane
+                          |  Отправить
+            script#file-uploader-template-bootstrap(type='text/template').
+              <div class="qq-uploader-selector qq-uploader file-uploader-drag-and-drop">
+              <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+              <span><i class="fa fa-crosshairs"></i> Отпустите файл тут</span>
+              </div>
+              <i class="fa fa-upload"></i> <a class="qq-upload-button-selector qq-upload-button file-uploader-link"> Приложить файлы</a> <span class="hidden-xs">или просто перетащите их на эту область для вложения</span>
+              <span class="qq-drop-processing-selector qq-drop-processing">
+              <span class="qq-drop-processing-spinner-selector">
+              <i class="fa fa-spinner fa-spin"></i>
+              </span>
+              <span>Идет обработка...</span>
+              </span>
+              <ul class="qq-upload-list-selector qq-upload-list">
+              <li style="border-top: none; border-bottom: none">
+              <img class="qq-thumbnail-selector" qq-max-size="100">&nbsp;
+              <span class="qq-upload-file-selector qq-upload-file" style="width: auto"></span>
+              <span class="qq-upload-size-selector qq-upload-size"></span>
+              <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Отменить</a>
+              <a class="qq-upload-delete-selector text-red" href="#"><i class="fa fa-trash-o"></i></a>
+              <span class="qq-upload-spinner-selector">
+              <i class="fa fa-spinner fa-spin"></i>
+              </span>
+              <div class="qq-progress-bar-container-selector progress">
+              <div class="qq-progress-bar-selector progress-bar progress-bar-info"></div>
+              </div>
+              </li>
+              </ul>
+              </div>

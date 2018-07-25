@@ -56,10 +56,8 @@ const GRVE = GRVE || {};
   GRVE.documentReady = {
     init() {
       GRVE.outlineJS.init()
-      GRVE.anchorScroll.init('a[data-scroll][href*="#"]:not([href="#"])')
       GRVE.pageSettings.init()
       GRVE.basicElements.init()
-      GRVE.phoneMask.init()
       GRVE.ajax.init()
     }
   }
@@ -144,185 +142,280 @@ const GRVE = GRVE || {};
     }
   }
 
-  // # Anchor scrolling effect
-  // ============================================================================= //
-  GRVE.anchorScroll = {
-    init(selector) {
-      const $selector = $(selector)
-
-      if (!$selector.length) return
-
-      $selector.on('click', () => {
-        if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
-          let target = $(this.hash)
-          target = target.length ? target : $(`[name=${this.hash.slice(1)}]`)
-
-          if (target.length) {
-            $('html, body').animate({
-              scrollTop: (target.offset().top + 3)
-            }, 1000)
-            return false
-          }
-        }
-      })
-    }
-  }
-
-  // # Phone masked input
-  // ============================================================================= //
-  GRVE.phoneMask = {
-    init() {
-      $('[type="tel"]').mask('+38 (099) 999 99 99')
-    }
-  }
-
 // # Ajax send Form
   // ============================================================================= //
   GRVE.ajax = {
     init() {
       const self = this
-      const parsleyOptions = {
-        excluded:                'input[type=button], input[type=submit], input[type=reset], [disabled]',
-        successClass:            'form-group--success',
-        errorClass:              'form-group--error',
-        errorsMessagesDisabled:  true,
-        minlength:               2,
-        classHandler(el) {
-          return el.$element.closest(".form-group")
-        }
-      }
-      this.customValidation()
-      const $forms = $('.js-form')
+      const $form = $('#userform')
 
-      if (!$forms.length) return false
-      $forms.parsley(parsleyOptions)
-      $forms.on('submit', function(e) {
-        const $form = $(this)
-        $form.parsley().validate()
-
-        if ($form.parsley().isValid()) {
+      if (!$form.length) return false
+      $form.on('submit', function(e) {
+        if (self.validate) {
           self.send( $(this) )
         }
-
         e.preventDefault()
       })
+
+      this.updateMessages()
+    },
+    validate() {
+      return true
     },
     send($form) {
-      const self =        this
-
-      const isWP =        $form.is("[data-form-ajax=\"wp\"]")
-      const $submit =     $form.find('[type=submit]')
-      const url =         isWP ? '/wp-admin/admin-ajax.php' : $form.attr('action')
-      const type =        ($form.attr('method')) ? $form.attr('method') : 'post'
       const data =        new FormData($form[0])
-      const formName =    $submit.val()
-      const redirect =    $form.data("redirect")
-
-      this.$result =      $form.find('.result')
-      this.$submit =      $submit
-
-      isWP && data.append('action', 'site_form')
-      data.append('form', formName)
+      const $editor =     $form.find(".note-editable")
+      const message =     $editor.html()
+      data.append('message', message)
 
       $.ajax({
-        url:              url,
-        type:             type,
+        url:              'post.php',
+        type:             'post',
         data,
         dataType:         'json',
         processData:      false,
         contentType:      false,
         cache:            false,
-        beforeSend() {
-          self.progress('hide')
-        },
-        complete() {
-          self.progress('show')
-        },
         success(data) {
           if (!data.success) {
-            const error = "Возникли проблемы с сервером. Сообщите нам о ошибке, мы постараемся устранить её в ближайшее время."
-            console.log(error)
-            self.submitFail(error)
+            console.log("Ошибка")
           } else if (data.success) {
-            $('.modal').modal('hide')
-            $('#success').modal('show')
-            if (redirect || data.redirect) {
-              document.location.href = redirect
-            }
+            GRVE.pageSettings.updateMessages(data)
+            $editor.empty()
             $form.trigger("reset")
           }
         },
-
         error(XMLHttpRequest, textStatus, errorThrown) {
-          self.submitFail(textStatus || errorThrown)
+          console.log(textStatus || errorThrown)
         }
       })
     },
-    submitFail(msg) {
-      this.alert(msg, "danger")
-      return false
-    },
-    submitDone(msg) {
-      this.alert(msg, "success")
-      return true
-    },
-    alert(msg, status) {
-      const self =   this
-      const $alert = `<div class="alert alert-${status} alert-dismissable fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times</span></button>${msg}</div>`
+    updateMessages() {
+      const data =        new FormData()
+      data.append('status', 'update')
 
-      this.$result.html($alert)
-      if (status === "success") {
-        setTimeout(() => {
-          self.$result.slideUp(() => {
-            self.$result.html('')
-          })
-        }, 3000)
-      }
-    },
-    progress(status) {
-      if (status === 'hide') {
-        this.$submit.prop('disabled', true)
-      } else if (status === 'show') {
-        this.$submit.prop('disabled', false)
-      }
-    },
-    customValidation() {
-      window.Parsley.addValidator('robots', {
-        validateString(value) {
-          return (value === '') ? true : false
+      $.ajax({
+        url:              'post.php',
+        type:             'post',
+        data,
+        dataType:         'json',
+        processData:      false,
+        contentType:      false,
+        cache:            false,
+        success(data) {
+          if (!data.success) {
+            console.log("Ошибка")
+          } else if (data.success) {
+            GRVE.pageSettings.updateMessages(data)
+          }
+        },
+        error(XMLHttpRequest, textStatus, errorThrown) {
+          console.log(textStatus || errorThrown)
         }
       })
-    },
+    }
   }
 
   // # Page Settings
   // ============================================================================= //
   GRVE.pageSettings = {
     init() {
-      this.svgPolifill()
-      //this.rangeSlider("[data-range-slider]")
+      this.updateMessagesByTimer()
+      this.galleryUploader()
+      this.dragndrop()
     },
-    svgPolifill() {
-      svg4everybody()
+    updateMessages({content}) {
+      const $chatBox = $(".chat-box")
+      let chatContent = ''
+
+      content.forEach((item, i, content) => {
+        chatContent += this.generateChatTemplate(item)
+      })
+
+      $chatBox.find("[data-message-id]").remove()
+
+      $chatBox.prepend(chatContent)
+
     },
-    rangeSlider(target) {
-      const $rangeSlider =  $(target)
+    updateMessagesByTimer() {
+      let timer = setInterval(() => {
+        GRVE.ajax.updateMessages()
+      }, 60 * 1000) // Every 60 seconds
+    },
+    generateChatTemplate(json) {
+      const { messageId, profile, isOwner, heading, message, datetime, datetext, image } = json
 
-      const min =      ( parseInt( $rangeSlider.attr("min")) ) ? parseInt( $rangeSlider.attr("min") ) : 0
-      const max =      ( parseInt( $rangeSlider.attr("max")) ) ? parseInt( $rangeSlider.attr("max") ) : 1
-      const step =     ( parseInt( $rangeSlider.attr("step")) ) ? parseInt( $rangeSlider.attr("step") ) : 1
-      const from =    ( parseInt( $rangeSlider.attr("value")) ) ? parseInt( $rangeSlider.attr("value") ) : 0
+      const arrowBox = isOwner ? 'arrow-box-right' : 'arrow-box-left'
 
-      $rangeSlider.ionRangeSlider({
-        type: "single",
-        grid: false,
-        step: step,
-        min: min,
-        max: max,
-        from: from,
-        hide_min_max: true,
-      });
-    }
+      let template = `<li id="message-${messageId}" data-message-id="${messageId}" data-profile-id="${profile.id}" class="${arrowBox}">
+        <div class="avatar"><a href="${profile.link}">
+            <div style="background-image: url(${profile.logo});" class="img-rounded avatar-container-25">
+              <div data-presence-for-profile-id="${profile.id}" title="Был на сервисе 5 часов 55 минут назад" class="profile-status offline with-tooltip"></div>
+            </div></a></div>
+        <div class="info"><a href="${profile.link}" title="Профиль фрилансера forzz">${profile.name}</a>
+          <div class="pull-right smallest">
+            <time datetime="${datetime}" class="timeago">${datetext}</time><a href="#message-${messageId}"><i class="fa fa-anchor"></i></a><a href="mailbox/read/thread/2617283" title="Цитировать" class="reply-form-with-quote-trigger"><i class="fa fa-quote-left"></i></a>
+          </div>
+        </div>`
+
+        if (heading) {
+          template += `<h4 style="color: inherit">${heading}</h4>`
+        }
+        template += `
+          <div style="padding-top: 5px" class="linkify-marker img-responsive-container">
+            ${message}
+          </div>
+        `
+
+        if ( image ) {
+          //images.forEach((item, i, content) => {
+          template += `<div style="padding-top: 5px" class="linkify-marker img-responsive-container">
+            <p>
+              <img src="${image.src}" style="width: 300px;" class="fr-fic fr-fil fr-dib" alt="image">
+            </p>
+          </div>`
+          //})
+        }
+
+        template += `<div class="clearfix"></div>
+          <div class="clearfix"> </div>
+        </li>`
+
+        return template
+/*
+
+      const ajax = {
+        success: true,
+        content: [
+          {
+            messageId: 13544995,
+            profile: {
+              id: 13544995,
+              logo: "https://content.freelancehunt.com/profile/photo/50/forzz.png",
+              link: "https://freelancehunt.com/freelancer/forzz.html",
+              name: "Артём Литвинко"
+            },
+            isOwner: false,
+            heading: "Верстка",
+            message: "<p>Здравствуйте Дмитрий, вы уже нашли исполнителя на верстку?</p>",
+            datetime: "2018-07-24T18:54:57Z",
+            datetext: "24 июля в 21:54",
+          },
+          {
+            messageId: 13545682,
+            profile: {
+              id: 331809,
+              logo: "https://content.freelancehunt.com/profile/photo/50/andrush.png",
+              link: "https://freelancehunt.com/employer/andrush.html",
+              name: "Dmitry Andrushchenko"
+            },
+            isOwner: true,
+            message: '<p>Нет, но завтра утром мне кого-то нужно будет выбрать:</p> <p><br></p> <p><br></p> <p>Сможете такое сделать?</p> <p><br></p> <p>Посмотрите внимательно картинку, она немного кривая, но думаю общий смысл я донес, нужно показать страницы конкретного сайта. Каждая страница должна состоять из нескольких блоков, возможно нужно добавить еще блока помимо "SEO ключи" - "фразы в топ" и "Конкуренты" , их я уже рисовать не стал. но если все сдвинуть немного вправо от картинки (скриншота), то думаю 2 блока еще можно аккуратно вместить.</p> <p>Думаю, что ьлок нужно свертсать с исполльзованием bootsrap, но это не является обязательным условием. Прошу лишь указать в заявке, что Вы собираетесь использовать. Для меня важен аккуратный код, который легко будет темизировать.</p> <p><br></p> <p>Я попробовал сделать, но получилось криво:&nbsp;<a href="http://46.4.130.245/test/test-bootstrap/111.html" rel="nofollow noopener" target="_blank">http://46.4.130.245/test/test-bootstrap/111.html</a></p>',
+            datetime: "2018-07-24T19:41:01Z",
+            datetext: "24 июля в 22:41",
+            images: [
+              {
+                src: "https://content.freelancehunt.com/message/34082/a8fba/1034344/%D0%B8%D0%BA%D0%BE%D0%BD1.png"
+              },
+            ]
+          },
+          {
+            messageId: 13545742,
+            profile: {
+              id: 13544995,
+              logo: "https://content.freelancehunt.com/profile/photo/50/forzz.png",
+              link: "https://freelancehunt.com/freelancer/forzz.html",
+              name: "Артём Литвинко"
+            },
+            isOwner: false,
+            message: "<p>Только вёрстка, я правильно понимаю?</p>",
+            datetime: "2018-07-24T19:46:15Z",
+            datetext: "24 июля в 22:46"
+          },
+          {
+            messageId: 13545759,
+            profile: {
+              id: 13544995,
+              logo: "https://content.freelancehunt.com/profile/photo/50/forzz.png",
+              link: "https://freelancehunt.com/freelancer/forzz.html",
+              name: "Артём Литвинко"
+            },
+            isOwner: false,
+            message: "<p>Делать буду на bootstrap+ flex,</p>",
+            datetime: "2018-07-24T19:47:53Z",
+            datetext: "24 июля в 22:47"
+          },
+        ]
+      }*/
+    },
+
+    galleryUploader() {
+      const galleryUploader = new qq.FineUploader({
+     
+        element: document.getElementById("file-uploader"),
+
+        autoUpload: !0,
+        text: {
+            defaultResponseError: "Системная ошибка при загрузке файла."
+        },
+        messages: {
+            emptyError: "{file} имеет нулевой размер",
+            sizeError: "{file} слишком большой, максимальный размер файла {sizeLimit}",
+            tooManyItemsError: "Вы можете приложить к сообщению не более {itemLimit} файлов (приложено {netItems})",
+            typeError: "Запрещенный тип файла {file}, разрешенные расширения: {extensions}"
+        },
+        validation: {
+            itemLimit: 10,
+            allowedExtensions: ["gif", "jpeg", "jpg", "png", "pdf", "psd", "gz", "7z", "docx", "doc", "zip", "rar", "rtf", "odt", "ott", "sxw", "ods", "ai", "gzip", "cdr", "mp3", "xlsx", "xls", "txt", "pptx", "ppt", "css", "c", "h", "js", "ico", "htm", "html", "csv", "yml", "json", "avi", "eps"],
+            sizeLimit:  1e7
+        },
+        deleteFile: {
+            enabled: !0,
+            endpoint: "/upload/dodeleteattachment/for/message/attachment"
+        },
+        request: {
+            endpoint: "/upload/domessageattach"
+        },
+        template: "file-uploader-template-bootstrap",
+        classes: {
+            success: "alert alert-success",
+            fail: "alert alert-error"
+        },
+        showMessage: function(e) {
+            Utils.warn(e)
+        }
+      })
+    },
+    dragndrop() {
+      $('.note').each(function() {
+        var element = this
+        var lang = $(element).data('lang')
+        
+        if (typeof(lang) == 'undefined') {
+          lang = 'en-US';
+        }
+        
+        $(element).summernote({
+          disableDragAndDrop: true,
+          height: 300,
+          lang: lang,
+          emptyPara: '',
+          toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'image', 'video']],
+            ['view', ['fullscreen', 'codeview', 'help']]
+          ],
+          buttons: {
+          
+            }
+        })
+      })
+    },
   }
 
 
@@ -330,136 +423,6 @@ const GRVE = GRVE || {};
   // ============================================================================= //
   GRVE.basicElements = {
     init() {
-
-    },
-    carousel() {
-
-      const $element = $('.js-carousel')
-
-      $element.each(function(){
-
-        const $carousel =     $(this)
-        const $nextNav =      $carousel.find('.js-carousel-next')
-        const $prevNav =      $carousel.find('.js-carousel-prev')
-        const sliderSpeed =   ( parseInt( $carousel.attr('data-slider-speed') ) ) ? parseInt( $carousel.attr('data-slider-speed') ) : 3000
-        const pagination = $carousel.attr('data-pagination') != 'no' ? true : false
-        const paginationSpeed = ( parseInt( $carousel.attr('data-pagination-speed') ) ) ? parseInt( $carousel.attr('data-pagination-speed') ) : 400
-        const autoHeight = $carousel.attr('data-slider-autoheight') == 'yes' ? true : false
-        const autoPlay = $carousel.attr('data-slider-autoplay') != 'no' ? true : false
-        const sliderPause = $carousel.attr('data-slider-pause') == 'yes' ? true : false
-        const loop = $carousel.attr('data-slider-loop') != 'no' ? true : false
-        const itemNum = parseInt( $carousel.attr('data-items'))
-        const tabletLandscapeNum = $carousel.attr('data-items-tablet-landscape') ? parseInt( $carousel.attr('data-items-tablet-landscape')) : 3
-        const tabletPortraitNum = $carousel.attr('data-items-tablet-portrait') ? parseInt( $carousel.attr('data-items-tablet-portrait')) : 3
-        const mobileNum = $carousel.attr('data-items-mobile') ? parseInt( $carousel.attr('data-items-mobile')) : 1
-        const gap = $carousel.hasClass('js-with-gap') && !isNaN( $carousel.data('gutter-size') ) ? Math.abs( $carousel.data('gutter-size') ) : 0
-
-        // Carousel Init
-        $carousel.owlCarousel({
-          loop,
-          autoplay : autoPlay,
-          autoplayTimeout : sliderSpeed,
-          autoplayHoverPause : sliderPause,
-          smartSpeed : 500,
-          dots : pagination,
-          responsive : {
-            0 : {
-              items : mobileNum
-            },
-            768 : {
-              items : tabletPortraitNum
-            },
-            1024 : {
-              items : tabletLandscapeNum
-            },
-            1200 : {
-              items : itemNum
-            }
-          },
-          margin : gap
-        })
-
-        $carousel.css('visibility','visible')
-
-        // Go to the next item
-        $nextNav.click(() => {
-          $carousel.trigger('next.owl.carousel')
-        })
-        // Go to the previous item
-        $prevNav.click(() => {
-          $carousel.trigger('prev.owl.carousel')
-        })
-      })
-    },
-    wowjs() {
-      var wow = new WOW({
-        boxClass:     'js-wow',      // animated element css class (default is wow)
-        animateClass: 'animated', // animation css class (default is animated)
-        offset:       0,          // distance to the element when triggering the animation (default is 0)
-        mobile:       false       // trigger animations on mobile devices (true is default)
-      })
-      wow.init()
-    },
-    countdown() {
-      $('[data-countdown]').each(function() {
-        const $this =                $(this)
-        const finalDate =            $this.data('countdown')
-        const delimeter =            (!!$this.data('countdown-delimeter') == true)  ? ':' : null
-        const hoursCount =           $this.data('countdown-hours')
-        const countdownFormat =      $this.data('countdown-format').split('|')
-        let countdownItems =         ''
-        let text =                   ''
-
-
-        $.each( countdownFormat, (index, value) => {
-          switch (value) {
-            case 'w':
-              text = "Недель"
-              break
-            case 'D':
-            case 'd':
-            case 'n':
-              text = "Дней"
-              break
-            case 'H':
-              text = "Часов"
-              break
-            case 'M':
-              text = "Минут"
-              break
-            case 'S':
-              text = "Секунд"
-              break
-            default:
-              text = ''
-          }
-         
-          countdownItems += '<div class="timer__item">'
-          countdownItems += `<div class="timer__time">%${value}</div>`
-          countdownItems += `<div class="timer__text">${text}</div>`
-          countdownItems += '</div>'
-
-          if (index === countdownFormat.length - 1) {
-            return
-          }
-
-          if (delimeter) {
-            countdownItems += '<div class="timer__item">'
-            countdownItems += `<div class="timer__time">${delimeter}</div>`
-            countdownItems += '</div>'
-          }
-
-        })
-
-        $this.countdown(finalDate, function(event) {
-          if (hoursCount) {
-            const hours = event.offset.totalDays * 24 + event.offset.hours
-            countdownItems = countdownItems.replace("%H", hours)
-          }
-
-          $(this).html(event.strftime( countdownItems ))
-        })
-      })
     },
   }
 

@@ -165,7 +165,9 @@ const GRVE = GRVE || {};
     send($form) {
       const data =        new FormData($form[0])
       const $editor =     $form.find(".note-editable")
-      const message =     $editor.html()
+      const $textarea =   $form.find("textarea.form-control")
+
+      const message =     $textarea.val()
       data.append('message', message)
 
       $.ajax({

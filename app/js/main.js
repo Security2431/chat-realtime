@@ -376,7 +376,7 @@ const GRVE = GRVE || {};
             endpoint: "/upload/dodeleteattachment/for/message/attachment"
         },
         request: {
-            endpoint: "/upload/domessageattach"
+          endpoint: '/server/endpoint.php'
         },
         template: "file-uploader-template-bootstrap",
         classes: {
@@ -384,7 +384,7 @@ const GRVE = GRVE || {};
             fail: "alert alert-error"
         },
         showMessage: function(e) {
-            Utils.warn(e)
+            console.log(e)
         }
       })
     },

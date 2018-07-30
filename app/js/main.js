@@ -163,12 +163,16 @@ const GRVE = GRVE || {};
       return true
     },
     send($form) {
-      const data =        new FormData($form[0])
-      const $editor =     $form.find(".note-editable")
-      const $textarea =   $form.find("textarea.form-control")
+      const data =         new FormData($form[0])
+      const $editor =      $form.find(".note-editable")
+      const $textarea =    $form.find("textarea.form-control")
+      const fileUploader = GRVE.pageSettings.fileUploader
+      const filename =     fileUploader.getUploads()[0].name
 
       const message =     $textarea.val()
       data.append('message', message)
+      filename.length &&
+        data.append('filename', filename)
 
       $.ajax({
         url:              'post.php',
@@ -184,6 +188,7 @@ const GRVE = GRVE || {};
           } else if (data.success) {
             GRVE.pageSettings.updateMessages(data)
             $editor.empty()
+            fileUploader.reset()
             $form.trigger("reset")
           }
         },
@@ -352,7 +357,7 @@ const GRVE = GRVE || {};
     },
 
     galleryUploader() {
-      const galleryUploader = new qq.FineUploader({
+      this.fileUploader = new qq.FineUploader({
      
         element: document.getElementById("file-uploader"),
 
@@ -373,7 +378,7 @@ const GRVE = GRVE || {};
         },
         deleteFile: {
             enabled: !0,
-            endpoint: "/upload/dodeleteattachment/for/message/attachment"
+            endpoint: "/server/dodeleteattachment/"
         },
         request: {
           endpoint: '/server/endpoint.php'

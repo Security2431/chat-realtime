@@ -167,12 +167,12 @@ const GRVE = GRVE || {};
       const $editor =      $form.find(".note-editable")
       const $textarea =    $form.find("textarea.form-control")
       const fileUploader = GRVE.pageSettings.fileUploader
-      const filename =     fileUploader.getUploads()[0].name
+      const filename =     fileUploader.getUploads()
 
       const message =     $textarea.val()
       data.append('message', message)
       filename.length &&
-        data.append('filename', filename)
+        data.append('filename', JSON.stringify(filename))
 
       $.ajax({
         url:              'post.php',
